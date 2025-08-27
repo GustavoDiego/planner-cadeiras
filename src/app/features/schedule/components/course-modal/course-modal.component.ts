@@ -7,6 +7,8 @@ import {
   computed,
   signal,
   SimpleChanges,
+  ViewChild,
+  ElementRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -51,6 +53,7 @@ export class CourseModalComponent implements OnChanges {
     meetings: Meeting[];
   }>();
 
+
   name = '';
   teacher = '';
   description = '';
@@ -58,10 +61,10 @@ export class CourseModalComponent implements OnChanges {
   code = '';
 
   selPeriod = signal<Period>('M');
-  selDays = new Set<WeekDayKey>();
+  selDay = signal<WeekDayKey | null>(null);
   selSlots = new Set<number>();
   manual: Meeting[] = [];
-
+  @ViewChild('nameInput') nameInput!: ElementRef<HTMLInputElement>;
   constructor(
     public store: ScheduleStore,
     private toast: ToastService,
@@ -90,18 +93,18 @@ export class CourseModalComponent implements OnChanges {
       period: m.period,
       slots: [...m.slots].sort((a, b) => a - b),
     }));
-    this.selDays.clear();
+    this.selDay.set(null);
     this.selSlots.clear();
     this.selPeriod.set('M');
   }
 
-  // horários por slot/periodo
+
   hourRange(p: Period, slot: number): string {
     const [start, end] = SLOT_TO_TIME(p, slot);
     return `${formatHour(start)}–${formatHour(end)}`;
   }
 
-  // ✅ usa selPeriod() dentro do computed
+
   slotOptions = computed(() => {
     const p = this.selPeriod();
     const max = p === 'T' ? 6 : 5;
@@ -116,33 +119,36 @@ export class CourseModalComponent implements OnChanges {
     return DAY_MAP[d as WeekDayKey] ?? d;
   }
 
-  toggleDay(d: WeekDayKey) {
-    if (this.selDays.has(d)) this.selDays.delete(d);
-    else this.selDays.add(d);
+  selectDay(d: WeekDayKey) {
+    this.selDay.set(this.selDay() === d ? null : d);
   }
+
   private pendingFromUI(): Meeting[] {
-    if (!this.selDays.size || !this.selSlots.size) return [];
+    const day = this.selDay();
+    if (!day || !this.selSlots.size) return [];
     const slots = Array.from(this.selSlots).sort((a, b) => a - b);
     const period = this.selPeriod();
-    return Array.from(this.selDays).map((day) => ({ day, period, slots }));
+    return [{ day, period, slots }];
   }
+
   toggleSlot(n: number) {
     if (this.selSlots.has(n)) this.selSlots.delete(n);
     else this.selSlots.add(n);
   }
 
   clearCurrent() {
-    this.selDays.clear();
+    this.selDay.set(null);
     this.selSlots.clear();
   }
 
   addBlock(): void {
-    if (!this.selDays.size || !this.selSlots.size) {
-      this.toast.push('Escolha dias e horários antes de adicionar.', 'warn');
+    const day = this.selDay();
+    if (!day || !this.selSlots.size) {
+      this.toast.push('Escolha 1 dia e 1 ou mais horários para adicionar um bloco.', 'warn');
       return;
     }
     const slots = Array.from(this.selSlots).sort((a, b) => a - b);
-    for (const day of this.selDays) this.upsertMeeting({ day, period: this.selPeriod(), slots });
+    this.upsertMeeting({ day, period: this.selPeriod(), slots });
     this.clearCurrent();
     this.toast.push('Bloco adicionado.', 'success');
   }
@@ -190,23 +196,48 @@ export class CourseModalComponent implements OnChanges {
     this.typeId = 'obg';
     this.code = '';
     this.manual = [];
-    this.selDays.clear();
+    this.selDay.set(null);
     this.selSlots.clear();
     this.selPeriod.set('M');
   }
-
+  get saveDisabledReason(): string {
+  if (!this.name?.trim()) return 'Informe o nome da disciplina.';
+  if (!(this.manual.length || (this.selDay() && this.selSlots.size) || this.code?.trim())) {
+    return 'Adicione 1 bloco ou insira um código válido.';
+  }
+  return '';
+}
+get canSave(): boolean {
+  const hasName = !!this.name?.trim();
+  const hasManual = this.manual.length > 0;
+  const hasInline = !!(this.selDay() && this.selSlots.size);
+  const hasCode = !!this.code?.trim();
+  return hasName && (hasManual || hasInline || hasCode);
+}
   save(): void {
-    const meetings = this.mergeMeetings([...this.manual, ...this.pendingFromUI()], this.fromCode());
+    if (!this.name?.trim()) {
+      this.toast.push('Informe o nome da disciplina antes de salvar.', 'warn');
+      const el = this.nameInput?.nativeElement;
+    if (el) {
+      el.focus();
+      el.classList.remove('shake');
 
+      void el.offsetWidth;
+      el.classList.add('shake');
+    }
+    return;
+    }
+
+    const meetings = this.mergeMeetings([...this.manual, ...this.pendingFromUI()], this.fromCode());
     if (!meetings.length) {
-      this.toast.push('Selecione ao menos um horário ou insira um código válido.', 'warn');
+      this.toast.push('Selecione ao menos um horário (ou informe um código válido).', 'warn');
       return;
     }
 
     if (!this.id) this.id = crypto.randomUUID();
     this.store.upsertCourse({
       id: this.id!,
-      name: this.name,
+      name: this.name.trim(),
       teacher: this.teacher || undefined,
       description: this.description || undefined,
       typeId: this.typeId,

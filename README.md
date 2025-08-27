@@ -105,7 +105,6 @@ ng build --configuration production
 ng build --configuration production --base-href /planner-cadeiras/
 ```
 
-
 ---
 
 ## 🧰 Estrutura do projeto (principal)
