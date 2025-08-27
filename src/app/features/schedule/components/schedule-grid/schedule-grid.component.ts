@@ -115,15 +115,12 @@ export class ScheduleGridComponent implements AfterViewInit, OnDestroy {
   }
   private exportMode = signal(false);
 
-  /** baseline na UI; compact na exportação */
   rowsView = computed(() => (this.exportMode() ? compact(this.store.courses()) : baseline()));
 
-  /** Faz TODAS as células de uma mesma linha terem a MESMA altura (máxima) */
-  private lockHeightsAll(): void {
+  lockHeightsAll(): void {
     const root = this.wrap?.nativeElement;
     if (!root) return;
 
-    // limpa antes de medir
     root
       .querySelectorAll<HTMLElement>('.timecell[data-p][data-i], .slotcell[data-p][data-i]')
       .forEach((el) => {
@@ -143,17 +140,14 @@ export class ScheduleGridComponent implements AfterViewInit, OnDestroy {
             `.slotcell[data-role="slot"][data-p="${period}"][data-i="${i}"]`,
           ),
         );
-
         if (!slotCells.length) continue;
 
-        // força reflow para garantir medidas naturais
         void timeCell.offsetHeight;
 
         const cells = [timeCell, ...slotCells];
         const max = Math.max(...cells.map((c) => c.getBoundingClientRect().height), 80);
         const h = `${Math.ceil(max)}px`;
 
-        // aplica a mesma altura em TODAS as colunas para essa linha
         cells.forEach((c) => {
           c.style.height = h;
           c.style.minHeight = h;
@@ -162,7 +156,7 @@ export class ScheduleGridComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  private unlockHeightsAll(): void {
+  unlockHeightsAll(): void {
     const root = this.wrap?.nativeElement;
     if (!root) return;
     root
@@ -172,26 +166,73 @@ export class ScheduleGridComponent implements AfterViewInit, OnDestroy {
         el.style.minHeight = '';
       });
   }
+  private rowsAreEqualized(tolerance = 1): boolean {
+    const root = this.wrap?.nativeElement;
+    if (!root) return true;
 
-  /** Chamados pela HomePage */
+    for (const period of this.periods) {
+      // pega todas as linhas desse período pela coluna de horários
+      const timeRows = Array.from(
+        root.querySelectorAll<HTMLElement>(`.timecell[data-role="time"][data-p="${period}"]`),
+      );
+
+      for (let i = 0; i < timeRows.length; i++) {
+        const cells = [
+          timeRows[i],
+          ...Array.from(
+            root.querySelectorAll<HTMLElement>(
+              `.slotcell[data-role="slot"][data-p="${period}"][data-i="${i}"]`,
+            ),
+          ),
+        ];
+        if (!cells.length) continue;
+
+        // mede
+        const hs = cells.map((c) => Math.round(c.getBoundingClientRect().height));
+        const min = Math.min(...hs);
+        const max = Math.max(...hs);
+        if (max - min > tolerance) {
+          return false; // desalinhou essa linha
+        }
+      }
+    }
+    return true;
+  }
   async enableExportMode() {
     this.exportMode.set(true);
     this.cdr.detectChanges();
-    // aguarda 2 frames para Angular renderizar/compactar linhas
+
+    // remove inline heights pra deixar o grid se “auto-ajustar”
+    this.unlockHeightsAll();
+
+    // aguarda fontes e 2 RAFs
+    try {
+      if ((document as any).fonts?.ready) await (document as any).fonts.ready;
+    } catch {}
     await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-    this.lockHeightsAll();
+
+    // evita placeholders/efeitos interferirem
+    await new Promise((r) => requestAnimationFrame(r));
+
+    // Fallback: se ainda não igualou, trava altura por linha e segue
+    if (!this.rowsAreEqualized(1)) {
+      this.lockHeightsAll();
+      await new Promise((r) => requestAnimationFrame(r));
+    }
   }
+
   disableExportMode() {
+    // Apenas limpe inline heights de novo e volte à UI normal
     this.unlockHeightsAll();
     this.exportMode.set(false);
     this.cdr.detectChanges();
-    // opcional: re-sincroniza para a UI normal
     requestAnimationFrame(() => this.syncRowHeights());
   }
+
   rowsByPeriod = computed(() => buildRowsByPeriod(this.store.courses()));
 
   isHourActive(_p: PeriodKey, _hStart: number): boolean {
-    return true; // <- TODOS os horários sempre ativos
+    return true;
   }
 
   onSlotClick(d: string, p: PeriodKey, hStart: number, ev: MouseEvent) {
@@ -245,7 +286,7 @@ export class ScheduleGridComponent implements AfterViewInit, OnDestroy {
 
   onToggle(p: PeriodKey) {
     this.open.update((x) => ({ ...x, [p]: !x[p] }));
-    // Aguarda o DOM atualizar completamente antes de sincronizar
+
     requestAnimationFrame(() => {
       requestAnimationFrame(() => this.syncRowHeights());
     });
@@ -289,7 +330,6 @@ export class ScheduleGridComponent implements AfterViewInit, OnDestroy {
       meetings: course.meetings.map((m) => ({ ...m, slots: [...m.slots] })),
     };
 
-    // Remove slot de origem
     const fromIdx = updated.meetings.findIndex(
       (m) => m.day === from.day && m.period === from.period,
     );
@@ -299,7 +339,6 @@ export class ScheduleGridComponent implements AfterViewInit, OnDestroy {
       if (!m.slots.length) updated.meetings.splice(fromIdx, 1);
     }
 
-    // Adiciona slot no destino
     const toIdx = updated.meetings.findIndex((m) => m.day === to.day && m.period === to.period);
     if (toIdx >= 0) {
       const m = updated.meetings[toIdx];
@@ -313,18 +352,14 @@ export class ScheduleGridComponent implements AfterViewInit, OnDestroy {
     this.debouncedSyncRowHeights();
   }
 
-  /* --------- Sincronização de altura melhorada --------- */
   ngAfterViewInit(): void {
     this.zone.runOutsideAngular(() => {
-      // ResizeObserver para mudanças no container
       this.ro = new ResizeObserver(() => {
         this.debouncedSyncRowHeights();
       });
       this.ro.observe(this.wrap.nativeElement);
 
-      // MutationObserver para mudanças de conteúdo
       this.mo = new MutationObserver((mutations) => {
-        // Verifica se houve mudanças relevantes (cards adicionados/removidos)
         const hasRelevantChanges = mutations.some(
           (mutation) =>
             mutation.type === 'childList' ||
@@ -346,9 +381,9 @@ export class ScheduleGridComponent implements AfterViewInit, OnDestroy {
     });
     this.connectedTo = this.lists.toArray();
     this.lists.changes.subscribe(() => {
-      this.connectedTo = this.lists.toArray(); // mantém conectado ao mudar o DOM
+      this.connectedTo = this.lists.toArray();
     });
-    // Primeira sincronização após render inicial
+
     requestAnimationFrame(() => {
       requestAnimationFrame(() => this.syncRowHeights());
     });
@@ -374,14 +409,13 @@ export class ScheduleGridComponent implements AfterViewInit, OnDestroy {
 
     this.syncTimeoutId = window.setTimeout(() => {
       this.syncRowHeights();
-    }, 16); // ~1 frame
+    }, 16);
   }
 
   private syncRowHeights(): void {
     const root = this.wrap?.nativeElement;
     if (!root) return;
 
-    // Reset todas as alturas previamente impostas
     const allCells = root.querySelectorAll<HTMLElement>(
       '.slotcell[data-p][data-i], .timecell[data-p][data-i]',
     );
@@ -390,11 +424,9 @@ export class ScheduleGridComponent implements AfterViewInit, OnDestroy {
       el.style.height = '';
     });
 
-    // Para cada período e linha, sincronizar alturas
     for (const period of this.periods) {
       if (!this.isOpen(period)) continue;
 
-      // Busca todas as linhas deste período usando a coluna de tempo como referência
       const timeRows = Array.from(
         root.querySelectorAll<HTMLElement>(`.timecell[data-role="time"][data-p="${period}"]`),
       );
@@ -402,7 +434,6 @@ export class ScheduleGridComponent implements AfterViewInit, OnDestroy {
       for (let rowIndex = 0; rowIndex < timeRows.length; rowIndex++) {
         const timeCell = timeRows[rowIndex];
 
-        // Busca todos os slots desta linha
         const slotCells = Array.from(
           root.querySelectorAll<HTMLElement>(
             `.slotcell[data-role="slot"][data-p="${period}"][data-i="${rowIndex}"]`,
@@ -411,20 +442,12 @@ export class ScheduleGridComponent implements AfterViewInit, OnDestroy {
 
         if (!slotCells.length) continue;
 
-        // Permite que o conteúdo defina sua altura natural primeiro
         requestAnimationFrame(() => {
-          // Mede as alturas naturais após o render
           const timeCellHeight = this.getElementHeight(timeCell);
           const slotHeights = slotCells.map((el) => this.getElementHeight(el));
 
-          // Calcula a altura máxima necessária
-          const maxHeight = Math.max(
-            timeCellHeight,
-            ...slotHeights,
-            80, // Altura mínima padrão
-          );
+          const maxHeight = Math.max(timeCellHeight, ...slotHeights, 80);
 
-          // Aplica a altura sincronizada
           const finalHeight = `${Math.ceil(maxHeight)}px`;
           timeCell.style.minHeight = finalHeight;
           slotCells.forEach((el) => (el.style.minHeight = finalHeight));
@@ -434,13 +457,11 @@ export class ScheduleGridComponent implements AfterViewInit, OnDestroy {
   }
 
   private getElementHeight(element: HTMLElement): number {
-    // Usa getBoundingClientRect para altura com conteúdo
     const rect = element.getBoundingClientRect();
     return rect.height;
   }
 }
 
-/* ---- Helpers iguais aos anteriores ---- */
 function hr(period: PeriodKey, h: number): Row {
   return { period, hStart: h, hEnd: h + 1, label: `${formatHour(h)}–${formatHour(h + 1)}` };
 }

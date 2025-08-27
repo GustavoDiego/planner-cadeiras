@@ -132,8 +132,6 @@
   opacity: 1;
 }
 
-
-
 .grid-wrap.exporting app-course-card,
 .grid-wrap.exporting .course-card {
   box-shadow: none !important;
@@ -161,7 +159,7 @@
 :host-context(.theme-light) .course,
 :host-context(.light) .course {
   background-color: #fff !important; /* cor sólida */
-  background-image: none !important;  /* mata o gradiente com transparente */
+  background-image: none !important; /* mata o gradiente com transparente */
 }
 
 /* e garanta que o preview também fique branco no claro */

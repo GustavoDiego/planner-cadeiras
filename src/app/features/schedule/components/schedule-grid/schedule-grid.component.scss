@@ -388,3 +388,38 @@
   padding-right: var(--gap);
   margin-right: calc(var(--gap) * -1);
 }
+.grid-wrap.exporting,
+.grid-wrap.exporting * {
+  animation: none !important;
+  transition: none !important;
+}
+
+.grid {
+  align-items: start;
+}
+
+.grid-wrap.exporting .grid {
+  align-items: stretch !important;
+}
+
+.grid-wrap.exporting .timecell,
+.grid-wrap.exporting .slotcell {
+  height: auto !important;
+  
+}
+
+.period-block {
+  grid-auto-rows: minmax(var(--row-h), auto);
+}
+/* no export, não deixe placeholder do CDK ‘pesar’ na altura */
+.grid-wrap.exporting .cdk-drag-placeholder {
+  display: none !important;
+  opacity: 0 !important;
+  transform: none !important;
+}
+
+/* e garanta que cada card ocupe largura total do slot */
+.grid-wrap.exporting .slotcell app-course-card,
+.grid-wrap.exporting .slotcell > * {
+  width: 100% !important;
+}

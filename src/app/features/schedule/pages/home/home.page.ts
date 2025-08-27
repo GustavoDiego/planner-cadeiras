@@ -51,10 +51,10 @@ export class HomePage implements OnInit {
     const content = wrap?.querySelector('.grid') as HTMLElement;
     if (!wrap || !content) return;
 
-    // 1) liga o modo compacto + trava alturas
+    wrap.classList.add('exporting');
+
     await this.grid?.enableExportMode();
 
-    wrap.classList.add('exporting');
     const prev = {
       wrapOverflow: wrap.style.overflow,
       contentWidth: content.style.width,
@@ -62,15 +62,14 @@ export class HomePage implements OnInit {
     };
 
     try {
-      // garante reflow já com alturas travadas
-      await new Promise((r) => requestAnimationFrame(r));
-
       const w = content.scrollWidth;
       wrap.style.overflow = 'visible';
       content.style.width = `${w}px`;
+
       const computedBg =
-      getComputedStyle(document.documentElement).getPropertyValue('--bg') || '#0f1115';
-        content.style.background = computedBg.trim();
+        getComputedStyle(document.documentElement).getPropertyValue('--bg') || '#0f1115';
+      content.style.background = computedBg.trim();
+
       await this.exportImg.exportElAsPng(content, 'horarios.png');
       this.toast.success('Imagem de horários exportada.');
     } catch (e) {
@@ -80,10 +79,9 @@ export class HomePage implements OnInit {
       content.style.width = prev.contentWidth;
       content.style.background = prev.bg;
       wrap.style.overflow = prev.wrapOverflow;
-      wrap.classList.remove('exporting');
 
-      // 2) volta ao normal
       this.grid?.disableExportMode();
+      wrap.classList.remove('exporting');
     }
   };
 

@@ -1,8 +1,8 @@
 # 🗂️ Planner de Cadeiras (Grade Horária)
 
 [![Deploy Angular to GitHub Pages](https://github.com/GustavoDiego/planner-cadeiras/actions/workflows/deploy.yml/badge.svg)](https://github.com/GustavoDiego/planner-cadeiras/actions/workflows/deploy.yml)
-![Angular](https://img.shields.io/badge/Angular-20-dd0031?logo=angular\&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?logo=typescript\&logoColor=white)
+![Angular](https://img.shields.io/badge/Angular-20-dd0031?logo=angular&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?logo=typescript&logoColor=white)
 ![Status](https://img.shields.io/badge/status-active-success)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
@@ -14,15 +14,15 @@ Um app **Angular** moderno para montar e gerenciar sua grade de disciplinas com 
 
 ## ✨ Features
 
-* 🧲 **Arrastar & soltar** (Angular CDK) entre dias/horários
-* 🗂️ **Períodos** (Manhã / Tarde / Noite) com **expansão/colapso**
-* 🧮 **Linhas auto-alinhadas**: sincronia de alturas por linha/mapa de slots
-* 🖼️ **Exportar PNG** da grade e de cards individuais (share)
-* 🌓 **Tema** claro/escuro (tokens CSS)
-* 🧭 **Rolagem automática** durante o drag (vertical e horizontal)
-* 🧱 **SPA fallback** (404.html) para rotas no GitHub Pages
-* ♿ **Acessível**: foco por teclado, `aria-*`, e preview de drag adequado
-* 📱 **Responsivo** (grid fluido, sticky headers, colunas com min/max)
+- 🧲 **Arrastar & soltar** (Angular CDK) entre dias/horários
+- 🗂️ **Períodos** (Manhã / Tarde / Noite) com **expansão/colapso**
+- 🧮 **Linhas auto-alinhadas**: sincronia de alturas por linha/mapa de slots
+- 🖼️ **Exportar PNG** da grade e de cards individuais (share)
+- 🌓 **Tema** claro/escuro (tokens CSS)
+- 🧭 **Rolagem automática** durante o drag (vertical e horizontal)
+- 🧱 **SPA fallback** (404.html) para rotas no GitHub Pages
+- ♿ **Acessível**: foco por teclado, `aria-*`, e preview de drag adequado
+- 📱 **Responsivo** (grid fluido, sticky headers, colunas com min/max)
 
 ---
 
@@ -30,8 +30,8 @@ Um app **Angular** moderno para montar e gerenciar sua grade de disciplinas com 
 
 > Substitua pelos seus arquivos quando quiser.
 
-* Dark: `docs/screenshot-dark.png`
-* Light: `docs/screenshot-light.png`
+- Dark: `docs/screenshot-dark.png`
+- Light: `docs/screenshot-light.png`
 
 ```md
 ![Planner - dark](docs/screenshot-dark.png)
@@ -44,8 +44,8 @@ Um app **Angular** moderno para montar e gerenciar sua grade de disciplinas com 
 
 ### Requisitos
 
-* **Node 20+**
-* **Angular CLI 20+**
+- **Node 20+**
+- **Angular CLI 20+**
 
 ### Instalação
 
@@ -89,9 +89,9 @@ Este repositório está pronto para publicar **automaticamente** ao fazer **push
 
 `.github/workflows/deploy.yml`:
 
-* build com `--base-href /planner-cadeiras/`
-* gera `404.html` (fallback SPA) e `.nojekyll`
-* publica em **GitHub Pages**
+- build com `--base-href /planner-cadeiras/`
+- gera `404.html` (fallback SPA) e `.nojekyll`
+- publica em **GitHub Pages**
 
 ### Ative o Pages
 
@@ -171,31 +171,31 @@ src/
 
 ## 🧠 Decisões de arquitetura
 
-* **Signals/Computed/Effects** para estado local de componentes;
-* **Angular CDK DragDrop** para arraste com **auto-scroll** (vertical e horizontal);
-* **ResizeObserver/MutationObserver** para **sincronizar alturas** de linhas dinamicamente;
-* **Tokens CSS** e `color-mix()` para temas e skins;
-* **Exportação de PNG** via serviço (captura de elementos do DOM);
-* **SPA Fallback (404.html)** para funcionar no GitHub Pages em qualquer rota.
+- **Signals/Computed/Effects** para estado local de componentes;
+- **Angular CDK DragDrop** para arraste com **auto-scroll** (vertical e horizontal);
+- **ResizeObserver/MutationObserver** para **sincronizar alturas** de linhas dinamicamente;
+- **Tokens CSS** e `color-mix()` para temas e skins;
+- **Exportação de PNG** via serviço (captura de elementos do DOM);
+- **SPA Fallback (404.html)** para funcionar no GitHub Pages em qualquer rota.
 
 ---
 
 ## 🎯 Dicas de uso
 
-* **Exportar PNG da grade**: botão “Baixar horários” (a UI troca para modo `exporting`, remove sombras/handles e aplica background consistente).
-* **Arraste** pelo **ícone “move”** do card (handle).
+- **Exportar PNG da grade**: botão “Baixar horários” (a UI troca para modo `exporting`, remove sombras/handles e aplica background consistente).
+- **Arraste** pelo **ícone “move”** do card (handle).
   No export, o handle **não aparece**.
-* **Colapsar/Expandir períodos**: clique em “Manhã/Tarde/Noite”.
+- **Colapsar/Expandir períodos**: clique em “Manhã/Tarde/Noite”.
 
 ---
 
 ## 🐛 Troubleshooting
 
-* **Página 404/blank no Pages**
+- **Página 404/blank no Pages**
   Garanta que o build usou `--base-href /planner-cadeiras/` **e** o workflow criou `404.html` & `.nojekyll` (já incluso).
-* **Linhas desalinhadas**
+- **Linhas desalinhadas**
   A sincronização de altura roda após mutações/resize. Se mexer no layout, mantenha as classes/atributos (`data-p`, `data-i`) e chame `syncRowHeights()` após mudanças grandes.
-* **Warnings de orçamento (budgets)**
+- **Warnings de orçamento (budgets)**
   Esses avisos **não** quebram o build. Se quiser ajustar, edite `angular.json` > `budgets`.
 
 ---
@@ -216,11 +216,11 @@ ng add @angular-eslint/schematics
 
 ## 🗺️ Roadmap (ideias)
 
-* [ ] Persistência em LocalStorage/IndexedDB
-* [ ] Import/Export de plano (JSON)
-* [ ] Atalhos de teclado (mover card, navegar células)
-* [ ] i18n (pt/pt-BR/en)
-* [ ] Testes E2E (Playwright) no CI
+- [ ] Persistência em LocalStorage/IndexedDB
+- [ ] Import/Export de plano (JSON)
+- [ ] Atalhos de teclado (mover card, navegar células)
+- [ ] i18n (pt/pt-BR/en)
+- [ ] Testes E2E (Playwright) no CI
 
 ---
 
@@ -251,8 +251,8 @@ Obrigado a todo mundo que usa, reporta issues e envia PRs!
 
 ## 🔗 Links rápidos
 
-* Angular CLI: [https://angular.dev/tools/cli](https://angular.dev/tools/cli)
-* Angular CDK Drag\&Drop: [https://material.angular.io/cdk/drag-drop/overview](https://material.angular.io/cdk/drag-drop/overview)
-* GitHub Pages: [https://pages.github.com/](https://pages.github.com/)
+- Angular CLI: [https://angular.dev/tools/cli](https://angular.dev/tools/cli)
+- Angular CDK Drag\&Drop: [https://material.angular.io/cdk/drag-drop/overview](https://material.angular.io/cdk/drag-drop/overview)
+- GitHub Pages: [https://pages.github.com/](https://pages.github.com/)
 
 > Curtiu? Abre uma ⭐ no repositório!
