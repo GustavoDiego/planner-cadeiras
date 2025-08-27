@@ -1,37 +1,47 @@
 name: Deploy Angular to GitHub Pages
+
 on:
   push:
     branches: [ master ]
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
+          cache: 'npm'
+
       - run: npm ci
-      - run: npx ng build --configuration production --base-href /planner-cadeiras/
-      - name: Upload artifact
+
+      # IMPORTANTE: base-href = /planner-cadeiras/
       - run: npx ng build --configuration production --base-href /planner-cadeiras/
 
-      - name: Add 404.html and .nojekyll
+      # Cria 404.html (fallback de rota) e desativa o Jekyll
+      - name: Prepare Pages artifact
+        id: prep
         run: |
           BROWSER_DIR=$(find dist -type d -name browser -print -quit)
           cp "$BROWSER_DIR/index.html" "$BROWSER_DIR/404.html"
           touch "$BROWSER_DIR/.nojekyll"
+          echo "artifact_path=$BROWSER_DIR" >> $GITHUB_OUTPUT
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist/**/browser
+          path: ${{ steps.prep.outputs.artifact_path }}
 
   deploy:
     needs: build
