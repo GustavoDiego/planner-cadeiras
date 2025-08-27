@@ -25,7 +25,8 @@ jobs:
           node-version: 20
           cache: 'npm'
 
-      - run: npm ci
+      - run: npm install --no-audit --no-fund
+
 
       # IMPORTANTE: base-href = /planner-cadeiras/
       - run: npx ng build --configuration production --base-href /planner-cadeiras/
