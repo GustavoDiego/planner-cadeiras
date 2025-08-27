@@ -26,20 +26,6 @@ Um app **Angular** moderno para montar e gerenciar sua grade de disciplinas com 
 
 ---
 
-## 📸 Screenshots
-
-> Substitua pelos seus arquivos quando quiser.
-
-- Dark: `docs/screenshot-dark.png`
-- Light: `docs/screenshot-light.png`
-
-```md
-![Planner - dark](docs/screenshot-dark.png)
-![Planner - light](docs/screenshot-light.png)
-```
-
----
-
 ## 🚀 Começando
 
 ### Requisitos
@@ -119,22 +105,6 @@ ng build --configuration production
 ng build --configuration production --base-href /planner-cadeiras/
 ```
 
----
-
-## 🧪 Testes
-
-Unit tests (Karma):
-
-```bash
-ng test
-```
-
-E2E (adicione o runner de sua preferência, ex.: Cypress/Playwright):
-
-```bash
-# exemplo (caso configure Cypress)
-npx cypress open
-```
 
 ---
 
