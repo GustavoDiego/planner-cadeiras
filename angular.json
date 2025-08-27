@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "my-grid": {
+    "planner-cadeiras": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -56,10 +56,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "my-grid:build:production"
+              "buildTarget": "planner-cadeiras:build:production"
             },
             "development": {
-              "buildTarget": "my-grid:build:development"
+              "buildTarget": "planner-cadeiras:build:development"
             }
           },
           "defaultConfiguration": "development"

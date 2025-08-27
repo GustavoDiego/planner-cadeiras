@@ -1,5 +1,5 @@
 {
-  "name": "my-grid",
+  "name": "planner-cadeiras",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
@@ -52,6 +52,7 @@
     "@angular/cli": "^20.1.6",
     "@angular/compiler-cli": "^20.1.0",
     "@types/jasmine": "~5.1.0",
+    "angular-cli-ghpages": "^2.0.3",
     "angular-eslint": "20.2.0",
     "eslint": "^9.33.0",
     "eslint-config-prettier": "^10.1.8",
