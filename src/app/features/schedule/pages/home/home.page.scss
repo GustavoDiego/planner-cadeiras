@@ -1,0 +1,24 @@
+.actions {
+  position: sticky;
+  top: 64px; /* abaixo do header */
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--bg) 88%, transparent),
+    color-mix(in oklab, var(--bg) 60%, transparent)
+  );
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+/* âncora não ficar escondida sob o sticky */
+#add {
+  scroll-margin-top: 88px;
+}

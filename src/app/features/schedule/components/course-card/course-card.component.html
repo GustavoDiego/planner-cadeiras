@@ -1,0 +1,31 @@
+<div
+  *ngIf="visible"
+  class="course"
+  [style.--type]="typeColor"
+  cdkDrag
+  [cdkDragData]="dragData"
+  tabindex="0"
+  role="button"
+  (cdkDragStarted)="onDragStarted()"
+  (cdkDragEnded)="onDragEnded()"
+  (click)="onCardActivate()"
+  (keydown.enter)="onCardActivate()"
+  (keydown.space)="onCardActivate()"
+>
+  <div class="type-pill"></div>
+
+  <div class="row">
+    <div class="title" [title]="course.name">{{ course.name }}</div>
+    <button
+      class="drag-handle"
+      cdkDragHandle
+      type="button"
+      aria-label="Arrastar"
+      (click)="$event.stopPropagation()"
+    >
+      <ng-icon name="lucideMove" class="icon-16"></ng-icon>
+    </button>
+  </div>
+
+  <div class="subtitle" *ngIf="typeLabel()">{{ typeLabel() }}</div>
+</div>

@@ -1,0 +1,80 @@
+<div
+  #wrap
+  id="grid"
+  class="grid-wrap container scroll-animated"
+  cdkScrollable
+  [class.dragging]="isDragging()"
+>
+  <div class="grid" cdkDropListGroup>
+    <!-- COLUNA DE HORÁRIOS -->
+    <div class="col timecol">
+      <div class="timecell head">Horário</div>
+
+      <ng-container *ngFor="let p of periods; trackBy: trackPeriod">
+        <button class="folder" type="button" [attr.aria-expanded]="isOpen(p)" (click)="onToggle(p)">
+          <span class="arrow">{{ isOpen(p) ? '▾' : '▸' }}</span>
+          <span class="label">{{ periodLabel(p) }}</span>
+        </button>
+
+        <div class="period-block" [class.collapsed]="!isOpen(p)">
+          <div
+            class="timecell"
+            *ngFor="let r of rowsView()[p]; let i = index; trackBy: trackRow"
+            [attr.data-role]="'time'"
+            [attr.data-p]="p"
+            [attr.data-i]="i"
+          >
+            {{ r.label }}
+          </div>
+        </div>
+      </ng-container>
+    </div>
+
+    <!-- COLUNAS POR DIA -->
+    <div class="col daycol" *ngFor="let d of days; trackBy: trackDay">
+      <div class="daycell head">{{ dayLabel(d) }}</div>
+
+      <ng-container *ngFor="let p of periods; trackBy: trackPeriod">
+        <div class="folder-spacer"></div>
+
+        <div class="period-block" [class.collapsed]="!isOpen(p)">
+          <div
+            class="slotcell"
+            *ngFor="let r of rowsView()[p]; let i = index; trackBy: trackRow"
+            [attr.data-role]="'slot'"
+            [attr.data-p]="p"
+            [attr.data-i]="i"
+            (click)="onSlotClick(d, p, r.hStart, $event)"
+            [class.empty]="!hasCourseAt(d, p, r.hStart)"
+            cdkDropList
+            [id]="'slot-' + d + '-' + p + '-' + r.hStart"
+            [cdkDropListData]="{ day: d, period: p, slot: hourToSlot(p, r.hStart) }"
+            (cdkDropListDropped)="onDrop($event)"
+            cdkDropListSortingDisabled="true"
+            [cdkDropListEnterPredicate]="enterAlways"
+            [cdkDropListConnectedTo]="connectedTo"
+          >
+            <div
+              *ngFor="let c of store.courses(); trackBy: trackCourse"
+              cdkDrag
+              [cdkDragData]="{
+                courseId: c.id,
+                from: { day: d, period: p, slot: hourToSlot(p, r.hStart) },
+              }"
+              (cdkDragMoved)="onDragMove($event)"
+              (cdkDragStarted)="onAnyDragStart()"
+              (cdkDragReleased)="onAnyDragEnd()"
+            >
+              <app-course-card
+                [course]="c"
+                [day]="d"
+                [hour]="r.hStart"
+                (openShare)="openShare.emit($event)"
+              ></app-course-card>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>

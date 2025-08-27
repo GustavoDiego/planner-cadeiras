@@ -1,0 +1,26 @@
+<div class="toasts" aria-live="polite" aria-atomic="true">
+  <div
+    class="toast"
+    *ngFor="let t of toast.list(); trackBy: trackToast"
+    [ngClass]="t.tone"
+    [style.--ttl]="(t.ttl ?? 4000) + 'ms'"
+    [animate.enter]="'toast-enter'"
+    [animate.leave]="'toast-leave'"
+    [attr.role]="t.tone === 'error' || t.tone === 'warn' ? 'alert' : 'status'"
+  >
+    <div class="ico">
+      <ng-icon *ngIf="t.tone === 'info'" name="lucideInfo" class="icon-18"></ng-icon>
+      <ng-icon *ngIf="t.tone === 'success'" name="lucideCheckCircle2" class="icon-18"></ng-icon>
+      <ng-icon *ngIf="t.tone === 'warn'" name="lucideAlertTriangle" class="icon-18"></ng-icon>
+      <ng-icon *ngIf="t.tone === 'error'" name="lucideXCircle" class="icon-18"></ng-icon>
+    </div>
+
+    <span class="msg">{{ t.message }}</span>
+
+    <button class="close" type="button" aria-label="Fechar" (click)="toast.dismiss(t.id)">
+      <ng-icon name="lucideX" class="icon-16"></ng-icon>
+    </button>
+
+    <div class="bar"></div>
+  </div>
+</div>

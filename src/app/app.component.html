@@ -1,0 +1,40 @@
+<header class="app-header" role="banner">
+  <div class="header-inner container">
+    <div class="brand">
+      <span class="logo-dot" aria-hidden="true"></span>
+      <h1>Planner de Cadeiras</h1>
+    </div>
+
+    <nav class="nav" aria-label="Navegação principal">
+      <a href="#grid" class="pill">
+        <ng-icon name="lucideCalendar" class="icon-20"></ng-icon>
+        <span class="label">Horários</span>
+      </a>
+      <button class="pill pill-primary" type="button" (click)="ui.openAddModal.set(true)">
+        <ng-icon name="lucidePlus" class="icon-20"></ng-icon>
+        <span class="label">Adicionar</span>
+      </button>
+    </nav>
+
+    <div class="actions">
+      <button
+        class="icon-btn"
+        type="button"
+        (click)="toggleTheme()"
+        [attr.aria-pressed]="isLight"
+        aria-label="Alternar tema"
+      >
+        <ng-icon *ngIf="!isLight" name="lucideSun" class="icon-18"></ng-icon>
+        <ng-icon *ngIf="isLight" name="lucideMoon" class="icon-18"></ng-icon>
+      </button>
+    </div>
+  </div>
+  <div class="glow-x" aria-hidden="true"></div>
+</header>
+
+<main>
+  <router-outlet></router-outlet>
+</main>
+<app-footer></app-footer>
+
+<app-toast-container></app-toast-container>

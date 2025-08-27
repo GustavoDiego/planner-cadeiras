@@ -1,0 +1,243 @@
+<ng-container *ngIf="visible">
+  <div class="modal-backdrop" [animate.enter]="'fade-enter'" [animate.leave]="'fade-leave'">
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="course-modal-title"
+      [animate.enter]="'pop-enter'"
+      [animate.leave]="'pop-leave'"
+    >
+      <header class="head">
+        <h2 id="course-modal-title">Nova disciplina</h2>
+        <button class="icon-btn" type="button" aria-label="Cancelar" (click)="close.emit()">
+          <ng-icon name="lucideX" class="icon-18"></ng-icon>
+        </button>
+      </header>
+
+      <form class="body" (ngSubmit)="save()" id="course-modal-form">
+        <div class="grid2">
+          <div class="field">
+            <label for="cm-name">Nome</label>
+            <input
+              id="cm-name"
+              [(ngModel)]="name"
+              name="name"
+              placeholder="Ex.: Bioquímica"
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="field">
+            <label for="cm-teacher">Professor(a)</label>
+            <input
+              id="cm-teacher"
+              [(ngModel)]="teacher"
+              name="teacher"
+              placeholder="Opcional"
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="field">
+            <label for="cm-type">Tipo</label>
+            <select id="cm-type" [(ngModel)]="typeId" name="typeId">
+              <option *ngFor="let t of store.types()" [value]="t.id">{{ t.label }}</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="cm-code">Código de horário <span class="muted">(opcional)</span></label>
+            <input
+              id="cm-code"
+              [(ngModel)]="code"
+              name="code"
+              placeholder="Ex.: 23M123"
+              spellcheck="false"
+              inputmode="text"
+            />
+          </div>
+
+          <div class="full-row hr-or"><span>ou</span></div>
+
+          <!-- Seleção manual -->
+          <div class="full-row">
+            <div class="group">
+              <div class="group-title">Período</div>
+              <div class="segmented">
+                <button
+                  type="button"
+                  class="seg"
+                  [class.active]="selPeriod() === 'M'"
+                  (click)="selPeriod.set('M')"
+                >
+                  <ng-icon name="lucideSun" class="icon-16"></ng-icon> Manhã
+                </button>
+                <button
+                  type="button"
+                  class="seg"
+                  [class.active]="selPeriod() === 'T'"
+                  (click)="selPeriod.set('T')"
+                >
+                  <ng-icon name="lucideSunset" class="icon-16"></ng-icon> Tarde
+                </button>
+                <button
+                  type="button"
+                  class="seg"
+                  [class.active]="selPeriod() === 'N'"
+                  (click)="selPeriod.set('N')"
+                >
+                  <ng-icon name="lucideMoon" class="icon-16"></ng-icon> Noite
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="full-row">
+            <div class="group">
+              <div class="group-title">Dias</div>
+              <div class="chips">
+                <button
+                  type="button"
+                  class="chip"
+                  [class.on]="selDays.has('2')"
+                  (click)="toggleDay('2')"
+                >
+                  {{ dayLabel('2') }}
+                </button>
+                <button
+                  type="button"
+                  class="chip"
+                  [class.on]="selDays.has('3')"
+                  (click)="toggleDay('3')"
+                >
+                  {{ dayLabel('3') }}
+                </button>
+                <button
+                  type="button"
+                  class="chip"
+                  [class.on]="selDays.has('4')"
+                  (click)="toggleDay('4')"
+                >
+                  {{ dayLabel('4') }}
+                </button>
+                <button
+                  type="button"
+                  class="chip"
+                  [class.on]="selDays.has('5')"
+                  (click)="toggleDay('5')"
+                >
+                  {{ dayLabel('5') }}
+                </button>
+                <button
+                  type="button"
+                  class="chip"
+                  [class.on]="selDays.has('6')"
+                  (click)="toggleDay('6')"
+                >
+                  {{ dayLabel('6') }}
+                </button>
+                <button
+                  type="button"
+                  class="chip"
+                  [class.on]="selDays.has('7')"
+                  (click)="toggleDay('7')"
+                >
+                  {{ dayLabel('7') }}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="full-row">
+            <div class="group">
+              <div class="group-title">Horários</div>
+              <div class="chips scroll-x">
+                <button
+                  type="button"
+                  class="chip"
+                  *ngFor="let s of slotOptions()"
+                  [class.on]="selSlots.has(s.n)"
+                  (click)="toggleSlot(s.n)"
+                >
+                  {{ s.label }}
+                </button>
+              </div>
+              <div class="group-actions">
+                <button type="button" class="btn-ghost" (click)="clearCurrent()">
+                  <ng-icon name="lucideEraser" class="icon-16"></ng-icon>
+                  Limpar seleção
+                </button>
+                <button type="button" class="btn" (click)="addBlock()">
+                  <ng-icon name="lucidePlus" class="icon-16"></ng-icon>
+                  Adicionar bloco
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Blocos adicionados -->
+          <div class="full-row" *ngIf="manual.length">
+            <div class="group">
+              <div class="group-title">Blocos adicionados</div>
+              <div class="added">
+                <div class="added-item" *ngFor="let m of manual">
+                  <div class="added-head">
+                    <span class="added-day">{{ dayLabel(m.day) }}</span>
+                    <span class="added-per">{{
+                      m.period === 'M' ? 'Manhã' : m.period === 'T' ? 'Tarde' : 'Noite'
+                    }}</span>
+                  </div>
+                  <div class="chips">
+                    <span class="chip" *ngFor="let n of m.slots">
+                      {{ hourRange(m.period, n) }}
+                    </span>
+                  </div>
+                  <button
+                    class="icon-btn sm"
+                    type="button"
+                    aria-label="Remover"
+                    (click)="removeBlock(m)"
+                  >
+                    <ng-icon name="lucideTrash2" class="icon-16"></ng-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="field full-row">
+            <label for="cm-desc">Descrição</label>
+            <textarea
+              id="cm-desc"
+              [(ngModel)]="description"
+              name="description"
+              rows="3"
+              placeholder="Opcional"
+            ></textarea>
+          </div>
+        </div>
+      </form>
+
+      <footer class="foot">
+        <button class="btn-ghost" type="button" (click)="close.emit()">
+          <ng-icon name="lucideX" class="icon-16"></ng-icon>
+          Cancelar
+        </button>
+        <button class="btn-ghost" type="button" (click)="onDownload()">
+          <ng-icon name="lucideDownload" class="icon-16"></ng-icon>
+          Baixar
+        </button>
+        <button
+          class="btn"
+          type="submit"
+          form="course-modal-form"
+          [disabled]="!manual.length && (!selDays.size || !selSlots.size) && !code"
+        >
+          <ng-icon name="lucideSave" class="icon-16"></ng-icon>
+          Salvar
+        </button>
+      </footer>
+    </div>
+  </div>
+</ng-container>

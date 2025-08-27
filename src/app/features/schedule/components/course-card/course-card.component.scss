@@ -1,0 +1,214 @@
+:host {
+  display: contents;
+}
+
+/* card minimalista, só o título */
+.course {
+  position: relative;
+  margin: 6px;
+  padding: 14px 12px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--surface, #171923) 96%, transparent),
+    transparent
+  );
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+  border-radius: var(--radius, 16px);
+  box-shadow: var(--shadow-1, 0 6px 18px rgba(0, 0, 0, 0.25));
+  display: grid;
+  gap: 8px;
+  cursor: pointer;
+  transition:
+    transform 120ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    box-shadow 120ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    background-color 120ms ease;
+  z-index: 1;
+}
+
+.course:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-2, 0 12px 32px rgba(0, 0, 0, 0.35));
+}
+.course:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--type, #7c3aed) 35%, transparent);
+}
+
+.type-pill {
+  position: absolute;
+  left: -1px;
+  top: 10px;
+  bottom: 10px;
+  width: 4px;
+  border-radius: 4px;
+  background: var(--type, var(--primary, #7c3aed));
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 20px;
+}
+
+.title {
+  font-weight: 800;
+  font-size: 14.5px;
+  line-height: 1.25;
+  letter-spacing: 0.2px;
+  color: var(--txt, #e6e9ef);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* duas linhas no máx */
+  -webkit-box-orient: vertical;
+}
+
+.drag-handle {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--surface, #171923) 100%, transparent);
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+  color: var(--muted, #94a3b8);
+  transition:
+    background 120ms ease,
+    transform 120ms ease;
+}
+.drag-handle:hover {
+  transform: translateY(-1px);
+}
+.drag-handle:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--type, #7c3aed) 40%, transparent);
+}
+
+/* drag feedback sempre por cima */
+.cdk-drag-preview {
+  z-index: 10000;
+  background: inherit;
+  border: none !important;
+  background-color: inherit;
+  border-radius: inherit;
+  box-shadow: var(--shadow-2, 0 12px 32px rgba(0, 0, 0, 0.35));
+  padding: 12px;
+}
+.cdk-drag-placeholder {
+  opacity: 0.15;
+}
+
+.subtitle {
+  font-size: 12.5px;
+  line-height: 1.2;
+  color: var(--muted, #94a3b8);
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-top: -2px;
+}
+.course-card {
+  background: var(--surface-2);
+  border: 1px solid color-mix(in oklab, var(--border) 85%, transparent);
+  border-radius: 14px;
+  box-shadow: var(--shadow-1);
+  position: relative;
+}
+
+.course-card::before {
+  content: none !important;
+}
+
+.course-card .title {
+  color: var(--txt);
+  font-weight: 700;
+}
+.course-card .subtitle {
+  color: color-mix(in oklab, var(--txt) 72%, transparent); /* mais forte */
+  opacity: 1;
+}
+
+
+
+.grid-wrap.exporting app-course-card,
+.grid-wrap.exporting .course-card {
+  box-shadow: none !important;
+  border-color: color-mix(in oklab, var(--border) 95%, transparent) !important;
+}
+
+.course-card[cdkDrag],
+.cdk-drag.course-card {
+  touch-action: none;
+  cursor: grab;
+}
+.drag-handle {
+  display: grid;
+  place-items: center;
+}
+
+.grid-wrap.exporting [cdkDragHandle],
+.grid-wrap.exporting .drag-handle,
+#course-share.exporting [cdkDragHandle],
+#course-share.exporting .drag-handle {
+  display: none !important;
+}
+/* cobre html, body ou qualquer container com data-theme */
+:host-context([data-theme='light']) .course,
+:host-context(.theme-light) .course,
+:host-context(.light) .course {
+  background-color: #fff !important; /* cor sólida */
+  background-image: none !important;  /* mata o gradiente com transparente */
+}
+
+/* e garanta que o preview também fique branco no claro */
+:host-context([data-theme='light']) .cdk-drag-preview,
+:host-context(.theme-light) .cdk-drag-preview,
+:host-context(.light) .cdk-drag-preview {
+  background-color: #fff !important;
+}
+/* Esconde o botão/handle no export do grid */
+:host-context(.grid-wrap.exporting) .drag-handle,
+:host-context(.grid-wrap.exporting) [cdkDragHandle] {
+  display: none !important;
+}
+
+/* Esconde também se você exportar o modal de share (#course-share) */
+:host-context(#course-share.exporting) .drag-handle,
+:host-context(#course-share.exporting) [cdkDragHandle] {
+  display: none !important;
+}
+
+/* Opcional: sem o botão, evita espaço extra causado por space-between */
+:host-context(.grid-wrap.exporting) .row,
+:host-context(#course-share.exporting) .row {
+  justify-content: flex-start !important;
+}
+/* pinta o canvas exportado com o fundo do tema */
+.grid-wrap.exporting .grid {
+  background: var(--bg) !important;
+}
+
+/* mata gradientes e sombras, e garante fundo sólido nas colunas */
+.grid-wrap.exporting .timecol,
+.grid-wrap.exporting .daycol,
+.grid-wrap.exporting .head {
+  background: var(--bg) !important;
+  box-shadow: none !important;
+}
+
+/* as células continuam transparentes para o bg “vazar” por baixo */
+.grid-wrap.exporting .slotcell,
+.grid-wrap.exporting .timecell {
+  background: transparent !important;
+}
+
+/* já tinha, mas mantendo pra cobrir o “gap” da primeira coluna */
+.grid-wrap.exporting .timecol {
+  position: static !important;
+  padding-right: var(--gap);
+  margin-right: calc(var(--gap) * -1);
+}

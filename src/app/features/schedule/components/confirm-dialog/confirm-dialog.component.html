@@ -1,0 +1,29 @@
+<ng-container *ngIf="open">
+  <div class="confirm-backdrop" (click)="onBackdropClick($event)">
+    <div class="confirm-card" role="dialog" aria-modal="true" [attr.aria-label]="title">
+      <div class="bg-accent"></div>
+
+      <header class="confirm-head">
+        <h3 class="title">{{ title }}</h3>
+        <button class="icon-btn" type="button" aria-label="Fechar" (click)="cancel.emit()">
+          <ng-icon name="lucideX" class="icon-18"></ng-icon>
+        </button>
+      </header>
+
+      <main class="confirm-body">
+        <p class="message">{{ message }}</p>
+      </main>
+
+      <footer class="confirm-foot">
+        <button class="btn-ghost" type="button" (click)="cancel.emit()">
+          <ng-icon name="lucideX" class="icon-16"></ng-icon>
+          {{ cancelLabel }}
+        </button>
+        <button class="btn" [class.danger]="danger" type="button" (click)="confirm.emit()">
+          <ng-icon name="lucideTrash2" class="icon-16" *ngIf="danger"></ng-icon>
+          {{ confirmLabel }}
+        </button>
+      </footer>
+    </div>
+  </div>
+</ng-container>

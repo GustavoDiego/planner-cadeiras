@@ -1,0 +1,56 @@
+<ng-container *ngIf="open && data">
+  <div class="share-backdrop">
+    <div
+      class="share-card"
+      id="course-share"
+      [style.--accent]="typeColor()"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="share-title"
+    >
+      <div class="bg-accent"></div>
+      <header class="share-head">
+        <span class="pill">{{ typeLabel() }}</span>
+        <button class="icon-btn" type="button" aria-label="Fechar" (click)="close.emit()">
+          <ng-icon name="lucideX" class="icon-18"></ng-icon>
+        </button>
+      </header>
+
+      <main class="share-body">
+        <h2 id="share-title" class="title">{{ data.name }}</h2>
+        <div class="meta" *ngIf="data.teacher">
+          <ng-icon name="lucideUser" class="icon-18"></ng-icon>
+          <span>{{ data.teacher }}</span>
+        </div>
+        <div class="sched" *ngIf="chips().length">
+          <div class="chip-row" *ngFor="let c of chips()">
+            <span class="chip chip-day">{{ c.day }}</span>
+            <span class="chip" *ngFor="let r of c.ranges">
+              <ng-icon name="lucideClock" class="icon-16"></ng-icon>{{ r }}
+            </span>
+          </div>
+        </div>
+        <p class="desc" *ngIf="data.description">{{ data.description }}</p>
+      </main>
+
+      <footer class="share-foot no-print">
+        <span class="spacer"></span>
+
+        <button class="btn-ghost" type="button" (click)="edit.emit(data)">
+          <ng-icon name="lucidePencil" class="icon-16"></ng-icon>
+          Editar
+        </button>
+
+        <button class="btn-ghost danger" type="button" (click)="delete.emit(data)">
+          <ng-icon name="lucideTrash2" class="icon-16"></ng-icon>
+          Excluir
+        </button>
+
+        <button class="btn" type="button" (click)="download.emit()">
+          <ng-icon name="lucideDownload" class="icon-16"></ng-icon>
+          Baixar
+        </button>
+      </footer>
+    </div>
+  </div>
+</ng-container>

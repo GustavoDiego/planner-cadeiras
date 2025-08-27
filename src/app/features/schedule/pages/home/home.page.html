@@ -1,0 +1,40 @@
+<section class="container actions">
+  <button class="btn btn-ghost" (click)="exportGrid()">
+    <ng-icon name="lucideDownload" class="icon-18"></ng-icon>
+    Baixar horários
+  </button>
+</section>
+
+<app-schedule-grid (openShare)="openShare($event)" (addAt)="onAddAt($event)"></app-schedule-grid>
+
+<app-course-share
+  *ngIf="shareOpen()"
+  [open]="shareOpen()"
+  [data]="shareData() ?? shareCourse()!"
+  (close)="closeShare()"
+  (download)="downloadShare()"
+  (edit)="onEditCourse($event)"
+  (delete)="onDeleteCourse($event)"
+></app-course-share>
+
+<app-course-modal
+  [open]="modal()"
+  [initial]="editing()"
+  (close)="closeModal()"
+  (download)="openShareDraft($event)"
+></app-course-modal>
+
+<app-confirm-dialog
+  [open]="confirmOpen()"
+  [title]="'Excluir disciplina?'"
+  [message]="
+    'Tem certeza que deseja excluir ' +
+    (confirmData()?.name || 'a disciplina') +
+    '? Esta ação não pode ser desfeita.'
+  "
+  confirmLabel="Excluir"
+  cancelLabel="Cancelar"
+  [danger]="true"
+  (confirm)="confirmDelete()"
+  (cancel)="cancelDelete()"
+></app-confirm-dialog>

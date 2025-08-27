@@ -1,0 +1,349 @@
+/* ===== FOOTER ======================================================= */
+.site-footer {
+  position: relative;
+  overflow: hidden;
+  margin-top: 24px;
+  padding: 28px 16px calc(34px + env(safe-area-inset-bottom));
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--surface) 92%, transparent),
+    color-mix(in oklab, var(--surface-2) 92%, transparent)
+  );
+  border-top: 1px solid var(--border);
+
+  /* Grid do footer — 1ª coluna pode encolher sem overflow */
+  .inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 16px;
+    padding-inline: 24px;
+    > * {
+      min-width: 0;
+    }
+  }
+
+  /* Ações (pills) */
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* Made-by (ícone + texto lado a lado sempre) */
+  .made-by {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+    margin-inline: auto;
+    gap: 8px;
+    color: var(--muted);
+    text-decoration: none;
+    transition:
+      color 160ms var(--ease-out-3),
+      background 160ms var(--ease-out-3),
+      transform 160ms var(--ease-out-3);
+    padding-inline: 8px;
+    max-width: 100%;
+    box-sizing: border-box;
+    white-space: nowrap;
+
+    /* Remove highlight feio no mobile */
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+
+    &:hover,
+    &:focus-visible {
+      color: var(--txt);
+    }
+
+    &:active {
+      background: color-mix(in oklab, var(--primary) 12%, transparent);
+      border-radius: 8px;
+      transform: scale(0.97);
+    }
+  }
+
+  .badge {
+    display: inline-grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
+    border-radius: 10px;
+    background:
+      radial-gradient(
+        120% 120% at 0% 0%,
+        color-mix(in oklab, var(--primary) 35%, transparent),
+        transparent 60%
+      ),
+      radial-gradient(
+        120% 120% at 100% 0%,
+        color-mix(in oklab, var(--mint) 30%, transparent),
+        transparent 60%
+      ),
+      radial-gradient(
+        120% 120% at 100% 100%,
+        color-mix(in oklab, var(--teal) 28%, transparent),
+        transparent 60%
+      ),
+      var(--surface-2);
+    border: 1px solid color-mix(in oklab, var(--primary) 40%, var(--border));
+    box-shadow: 0 8px 20px color-mix(in oklab, var(--primary) 16%, transparent);
+    transform: translateZ(0);
+    animation: float 5.2s var(--ease-smooth) infinite;
+  }
+
+  .txt {
+    font-size: var(--fs-14);
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: unset;
+    text-align: center;
+    strong {
+      color: var(--txt);
+    }
+  }
+
+  /* Pills gerais */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 40px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--txt);
+    text-decoration: none;
+    justify-content: center;
+    text-align: center;
+    transition:
+      transform 140ms var(--ease-out-3),
+      box-shadow 140ms var(--ease-out-3),
+      border-color 140ms var(--ease-out-3),
+      background 140ms var(--ease-out-3);
+
+    flex: 0 0 auto;
+    max-width: 100%;
+
+    /* Remove highlight feio no mobile */
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+
+    span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    &:hover,
+    &:focus-visible {
+      transform: translateY(-1px);
+      border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
+      box-shadow: 0 10px 26px color-mix(in oklab, var(--primary) 16%, transparent);
+    }
+
+    &:focus {
+      outline: none;
+    }
+
+    &:focus-visible {
+      border-color: color-mix(in oklab, var(--teal) 45%, var(--border));
+      box-shadow:
+        0 0 0 3px color-mix(in oklab, var(--teal) 55%, transparent),
+        0 10px 26px color-mix(in oklab, var(--teal) 16%, transparent);
+    }
+
+    &:active {
+      background: color-mix(in oklab, var(--primary) 12%, transparent);
+      transform: scale(0.97);
+    }
+  }
+
+  /* Estilos específicos */
+  .gh-btn {
+    background: color-mix(in oklab, var(--primary) 14%, var(--surface-2));
+    .icon-18 {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  .to-top {
+    background: color-mix(in oklab, var(--teal) 12%, var(--surface-2));
+    border-color: color-mix(in oklab, var(--teal) 40%, var(--border));
+  }
+
+  /* Barra glow */
+  .glow {
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      color-mix(in oklab, var(--primary) 60%, transparent) 15%,
+      color-mix(in oklab, var(--mint) 60%, transparent) 35%,
+      color-mix(in oklab, var(--teal) 60%, transparent) 55%,
+      color-mix(in oklab, var(--lime) 60%, transparent) 75%,
+      transparent 100%
+    );
+    transform: translateX(-30%);
+    animation: shimmer 3.8s linear infinite;
+  }
+
+  .meta {
+    margin-top: 14px;
+    text-align: center;
+    .copyright {
+      color: color-mix(in oklab, var(--muted) 84%, transparent);
+    }
+  }
+
+  /* Orbs decorativos */
+  .orbs {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .orb {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    filter: blur(28px);
+    opacity: 0.18;
+  }
+  .o1 {
+    left: -40px;
+    bottom: -60px;
+    background: color-mix(in oklab, var(--primary) 45%, transparent);
+    animation: drift 16s ease-in-out infinite;
+  }
+  .o2 {
+    right: 10%;
+    bottom: -80px;
+    background: color-mix(in oklab, var(--teal) 45%, transparent);
+    animation: drift 20s ease-in-out infinite reverse;
+  }
+  .o3 {
+    left: 45%;
+    bottom: -70px;
+    background: color-mix(in oklab, var(--lime) 40%, transparent);
+    animation: drift 22s ease-in-out infinite;
+  }
+
+  /* Acessibilidade/foco */
+  a:focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--primary) 70%, transparent);
+    outline-offset: 3px;
+    border-radius: 10px;
+  }
+
+  /* Prefere menos movimento */
+  @media (prefers-reduced-motion: reduce) {
+    .glow,
+    .badge,
+    .orb {
+      animation: none;
+    }
+    .pill:hover,
+    .pill:focus-visible {
+      transform: none;
+      box-shadow: none;
+    }
+  }
+
+  /* Animações */
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-30%);
+    }
+    100% {
+      transform: translateX(130%);
+    }
+  }
+  @keyframes float {
+    0% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-3px);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+  @keyframes drift {
+    0% {
+      transform: translateY(0) translateX(0) scale(1);
+    }
+    50% {
+      transform: translateY(-16px) translateX(8px) scale(1.04);
+    }
+    100% {
+      transform: translateY(0) translateX(0) scale(1);
+    }
+  }
+
+  /* Quebra responsiva */
+  @media (max-width: 1024px) {
+    .inner {
+      grid-template-columns: 1fr;
+      justify-items: center;
+      text-align: center;
+    }
+    .made-by {
+      justify-content: center;
+      justify-self: center;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .actions {
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      > .pill {
+        flex: 0 0 auto;
+      }
+    }
+    .made-by {
+      flex-direction: row;
+      gap: 6px;
+    }
+  }
+
+  /* Ajuste final para telas menores que 500px */
+  @media (max-width: 500px) {
+    .inner {
+      grid-template-columns: 1fr !important;
+      justify-items: center;
+      text-align: center;
+    }
+
+    .made-by {
+      display: inline-flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-inline: auto;
+      max-width: fit-content;
+      white-space: nowrap;
+      padding-inline: 0;
+      text-align: center;
+    }
+
+    .txt {
+      white-space: nowrap;
+      overflow: visible;
+      text-overflow: unset;
+      text-align: center;
+    }
+  }
+}
