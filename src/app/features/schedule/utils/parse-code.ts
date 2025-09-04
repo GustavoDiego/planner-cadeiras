@@ -1,7 +1,7 @@
 import { Meeting, PeriodKey, WeekDayKey } from '../models/course.model';
 import { periodMaxSlot } from './time-utils';
 
-export const parseScheduleCode = (raw: string): Meeting[] => {
+export const parseScheduleCode = (raw: string, twelve = false): Meeting[] => {
   if (!raw) return [];
   const tokens = raw
     .replace(/\s+/g, ' ')
@@ -15,7 +15,7 @@ export const parseScheduleCode = (raw: string): Meeting[] => {
     if (!m) continue;
     const days = m[1].split('').filter((d) => /[2-7]/.test(d)) as WeekDayKey[];
     const period = m[2].toUpperCase() as PeriodKey;
-    const max = periodMaxSlot(period);
+    const max = periodMaxSlot(period, twelve);
     const slots = m[3]
       .split('')
       .map((n) => parseInt(n, 10))
@@ -29,7 +29,6 @@ export const parseScheduleCode = (raw: string): Meeting[] => {
       acc.set(key, rec);
     }
   }
-
   return Array.from(acc.values()).map((r) => ({
     day: r.day,
     period: r.period,

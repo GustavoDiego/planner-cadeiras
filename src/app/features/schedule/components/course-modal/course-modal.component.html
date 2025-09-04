@@ -15,36 +15,37 @@
         </button>
       </header>
 
-     <form class="body" (ngSubmit)="save()" id="course-modal-form" #f="ngForm">
+      <form class="body" (ngSubmit)="save()" id="course-modal-form" #f="ngForm">
         <div class="grid2">
-          <div class="field required"
-           [class.invalid]="nameCtrl.invalid && (nameCtrl.touched || f.submitted)">
-            <label for="cm-name">
-        Nome <span class="req" aria-hidden="true">*</span>
-            </label>
+          <div
+            class="field required"
+            [class.invalid]="nameCtrl.invalid && (nameCtrl.touched || f.submitted)"
+          >
+            <label for="cm-name"> Nome <span class="req" aria-hidden="true">*</span> </label>
             <input
               id="cm-name"
-        #nameInput
-        [(ngModel)]="name"
-        name="name"
-        required
-        placeholder="Ex.: Bioquímica"
-        autocomplete="off"
-        #nameCtrl="ngModel"
-        [attr.aria-invalid]="nameCtrl.invalid && (nameCtrl.touched || f.submitted)"
-        [attr.aria-describedby]="(nameCtrl.invalid && (nameCtrl.touched || f.submitted)) ? 'cm-name-err' : null"
+              #nameInput
+              [(ngModel)]="name"
+              name="name"
+              required
+              placeholder="Ex.: Bioquímica"
+              autocomplete="off"
+              #nameCtrl="ngModel"
+              [attr.aria-invalid]="nameCtrl.invalid && (nameCtrl.touched || f.submitted)"
+              [attr.aria-describedby]="
+                nameCtrl.invalid && (nameCtrl.touched || f.submitted) ? 'cm-name-err' : null
+              "
             />
-                  <div
-        class="field-msg"
-        id="cm-name-err"
-        role="alert"
-        *ngIf="nameCtrl.invalid && (nameCtrl.touched || f.submitted)"
-      >
-        <ng-icon name="lucideAlertCircle" class="icon-14"></ng-icon>
-        Informe o nome da disciplina.
-      </div>
-    </div>
-
+            <div
+              class="field-msg"
+              id="cm-name-err"
+              role="alert"
+              *ngIf="nameCtrl.invalid && (nameCtrl.touched || f.submitted)"
+            >
+              <ng-icon name="lucideAlertCircle" class="icon-14"></ng-icon>
+              Informe o nome da disciplina.
+            </div>
+          </div>
 
           <div class="field">
             <label for="cm-teacher">Professor(a)</label>
@@ -93,6 +94,22 @@
                   <ng-icon name="lucideMoon" class="icon-16"></ng-icon> Noite
                 </button>
               </div>
+            </div>
+          </div>
+          <div class="full-row" *ngIf="selPeriod() === 'T'">
+            <div class="group">
+              <div class="group-title">Configuração</div>
+              <label class="toggle-wrap">
+                <input
+                  type="checkbox"
+                  [checked]="config.twelveAsFirst()"
+                  (change)="config.twelveAsFirst.set($event.target.checked)"
+                />
+                <span class="switch"></span>
+                <span class="label">
+                  {{ config.twelveAsFirst() ? '12 horas é Aula' : '12 horas é almoço' }}
+                </span>
+              </label>
             </div>
           </div>
 
@@ -171,9 +188,7 @@
                 </button>
               </div>
 
-
               <div class="hr-or tight"><span>ou</span></div>
-
 
               <div class="field">
                 <label for="cm-code">Código de horário <span class="muted">(opcional)</span></label>
@@ -242,31 +257,29 @@
           </div>
         </div>
 
+        <footer class="foot">
+          <button class="btn-ghost" type="button" (click)="close.emit()">
+            <ng-icon name="lucideX" class="icon-16"></ng-icon>
+            Cancelar
+          </button>
 
-      <footer class="foot">
-        <button class="btn-ghost" type="button" (click)="close.emit()">
-          <ng-icon name="lucideX" class="icon-16"></ng-icon>
-          Cancelar
-        </button>
+          <button
+            class="btn"
+            type="submit"
+            [disabled]="!canSave"
+            [attr.aria-disabled]="!canSave"
+            [attr.title]="!canSave ? saveDisabledReason : null"
+          >
+            <ng-icon name="lucideSave" class="icon-16"></ng-icon>
+            Salvar
+          </button>
 
-<button
-  class="btn"
-  type="submit"
-  [disabled]="!canSave"
-  [attr.aria-disabled]="!canSave"
-  [attr.title]="!canSave ? saveDisabledReason : null">
-  <ng-icon name="lucideSave" class="icon-16"></ng-icon>
-  Salvar
-</button>
-
-
-<p class="save-hint" *ngIf="!canSave">
-  <ng-icon name="lucideInfo" class="icon-14"></ng-icon>
-  {{ saveDisabledReason }}
-</p>
-
-      </footer>
-    </form>
+          <p class="save-hint" *ngIf="!canSave">
+            <ng-icon name="lucideInfo" class="icon-14"></ng-icon>
+            {{ saveDisabledReason }}
+          </p>
+        </footer>
+      </form>
     </div>
   </div>
 </ng-container>

@@ -19,7 +19,8 @@ import { CommonModule } from '@angular/common';
 import { CdkDropListGroup, CdkDropList, CdkDrag, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { ScheduleStore } from '../../state/schedule.store';
 import { Course } from '../../models/course.model';
-import { DAY_MAP, SLOT_TO_TIME, formatHour } from '../../utils/time-utils';
+import { DAY_MAP, SLOT_TO_TIME, formatHour, periodMaxSlot } from '../../utils/time-utils';
+import { CourseConfigStore } from '../../state/course-config.store';
 import { CourseCardComponent } from '../course-card/course-card.component';
 import { CdkDragMove } from '@angular/cdk/drag-drop';
 import { ScrollingModule } from '@angular/cdk/scrolling';
@@ -96,14 +97,19 @@ export class ScheduleGridComponent implements AfterViewInit, OnDestroy {
   open = signal<Record<PeriodKey, boolean>>({ M: true, T: true, N: true });
   isDragging = signal(false);
   private prevOpen?: Record<PeriodKey, boolean> | null = null;
-  activeHours = computed(() => usedHoursByPeriod(this.store.courses()));
-  rowsAll = computed(() => baseline());
-  rowsUI = computed(() => baseline());
+  activeHours = computed(() =>
+    usedHoursByPeriod(this.store.courses(), this.config.twelveAsFirst()),
+  );
+
+  rowsAll = computed(() => baseline(this.config.twelveAsFirst()));
+  rowsUI = computed(() => baseline(this.config.twelveAsFirst()));
+
   enterAlways = (_drag: CdkDrag<unknown>, _drop: CdkDropList<unknown>) => true;
   constructor(
     public store: ScheduleStore,
     private zone: NgZone,
     private cdr: ChangeDetectorRef,
+    public config: CourseConfigStore,
   ) {
     effect(() => {
       const map = hasCoursesByPeriod(this.store.courses());
@@ -115,8 +121,11 @@ export class ScheduleGridComponent implements AfterViewInit, OnDestroy {
   }
   private exportMode = signal(false);
 
-  rowsView = computed(() => (this.exportMode() ? compact(this.store.courses()) : baseline()));
-
+  rowsView = computed(() =>
+    this.exportMode()
+      ? compact(this.store.courses(), this.config.twelveAsFirst())
+      : baseline(this.config.twelveAsFirst()),
+  );
   lockHeightsAll(): void {
     const root = this.wrap?.nativeElement;
     if (!root) return;
@@ -229,7 +238,9 @@ export class ScheduleGridComponent implements AfterViewInit, OnDestroy {
     requestAnimationFrame(() => this.syncRowHeights());
   }
 
-  rowsByPeriod = computed(() => buildRowsByPeriod(this.store.courses()));
+  rowsByPeriod = computed(() =>
+    buildRowsByPeriod(this.store.courses(), this.config.twelveAsFirst()),
+  );
 
   isHourActive(_p: PeriodKey, _hStart: number): boolean {
     return true;
@@ -305,9 +316,10 @@ export class ScheduleGridComponent implements AfterViewInit, OnDestroy {
   trackCourse = (_: number, c: Course) => c.id;
 
   hourToSlot(p: PeriodKey, hStart: number): number {
-    const max = p === 'T' ? 6 : 5;
+    const twelve = this.config.twelveAsFirst();
+    const max = periodMaxSlot(p, twelve);
     for (let n = 1; n <= max; n++) {
-      const [a] = SLOT_TO_TIME(p, n);
+      const [a] = SLOT_TO_TIME(p, n, twelve);
       if (a === hStart) return n;
     }
     return 1;
@@ -466,30 +478,31 @@ function hr(period: PeriodKey, h: number): Row {
   return { period, hStart: h, hEnd: h + 1, label: `${formatHour(h)}–${formatHour(h + 1)}` };
 }
 
-function baseline(): Record<PeriodKey, Row[]> {
+function baseline(twelve: boolean): Record<PeriodKey, Row[]> {
+  const startT = twelve ? 12 : 13;
+  const lenT = periodMaxSlot('T', twelve); // 6 se 12h, 5 se 13h
   return {
     M: Array.from({ length: 5 }, (_, i) => hr('M', 7 + i)),
-    T: Array.from({ length: 6 }, (_, i) => hr('T', 12 + i)),
+    T: Array.from({ length: lenT }, (_, i) => hr('T', startT + i)),
     N: Array.from({ length: 5 }, (_, i) => hr('N', 18 + i)),
   };
 }
 
-function compact(courses: Course[]): Record<PeriodKey, Row[]> {
+function compact(courses: Course[], twelve: boolean): Record<PeriodKey, Row[]> {
   const usedM = new Set<number>(),
     usedT = new Set<number>(),
     usedN = new Set<number>();
   for (const c of courses) {
     for (const m of c.meetings ?? []) {
       for (const s of m.slots ?? []) {
-        const [a] = SLOT_TO_TIME(m.period, s);
+        const [a] = SLOT_TO_TIME(m.period as PeriodKey, s, twelve);
         if (m.period === 'M') usedM.add(a);
         else if (m.period === 'T') usedT.add(a);
         else usedN.add(a);
       }
     }
   }
-
-  if (!usedM.size && !usedT.size && !usedN.size) return baseline();
+  if (!usedM.size && !usedT.size && !usedN.size) return baseline(twelve);
 
   return {
     M: [...usedM].sort((a, b) => a - b).map((h) => hr('M', h)),
@@ -497,8 +510,7 @@ function compact(courses: Course[]): Record<PeriodKey, Row[]> {
     N: [...usedN].sort((a, b) => a - b).map((h) => hr('N', h)),
   };
 }
-
-function buildRowsByPeriod(courses: Course[]) {
+function buildRowsByPeriod(courses: Course[], twelve: boolean) {
   let hasAnySlot = false;
   for (const c of courses) {
     for (const m of c.meetings ?? []) {
@@ -509,11 +521,9 @@ function buildRowsByPeriod(courses: Course[]) {
     }
     if (hasAnySlot) break;
   }
-
-  if (!hasAnySlot) return baseline();
-  return compact(courses);
+  if (!hasAnySlot) return baseline(twelve);
+  return compact(courses, twelve);
 }
-
 function hasCoursesByPeriod(courses: Course[]) {
   const map: Record<PeriodKey, boolean> = { M: false, T: false, N: false };
   for (const c of courses) {
@@ -523,14 +533,14 @@ function hasCoursesByPeriod(courses: Course[]) {
   }
   return map;
 }
-function usedHoursByPeriod(courses: Course[]): Record<PeriodKey, Set<number>> {
+function usedHoursByPeriod(courses: Course[], twelve: boolean): Record<PeriodKey, Set<number>> {
   const M = new Set<number>(),
     T = new Set<number>(),
     N = new Set<number>();
   for (const c of courses) {
     for (const m of c.meetings ?? []) {
       for (const s of m.slots ?? []) {
-        const [h] = SLOT_TO_TIME(m.period, s);
+        const [h] = SLOT_TO_TIME(m.period as PeriodKey, s, twelve);
         if (m.period === 'M') M.add(h);
         else if (m.period === 'T') T.add(h);
         else N.add(h);

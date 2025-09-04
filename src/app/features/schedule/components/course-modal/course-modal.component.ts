@@ -13,12 +13,14 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ScheduleStore } from '../../state/schedule.store';
+import { DAY_MAP, SLOT_TO_TIME, formatHour, periodMaxSlot } from '../../utils/time-utils';
 import { parseScheduleCode } from '../../utils/parse-code';
 import { NgIcon } from '@ng-icons/core';
-import { DAY_MAP, SLOT_TO_TIME, formatHour } from '../../utils/time-utils';
+
 import type { Meeting as ModelMeeting, WeekDayKey } from '../../models/course.model';
 import { ToastService } from '../../../../core/services/toast.service';
 import { coerceBooleanProperty } from '@angular/cdk/coercion';
+import { CourseConfigStore } from '../../state/course-config.store';
 type Period = 'M' | 'T' | 'N';
 type Meeting = ModelMeeting;
 
@@ -53,7 +55,6 @@ export class CourseModalComponent implements OnChanges {
     meetings: Meeting[];
   }>();
 
-
   name = '';
   teacher = '';
   description = '';
@@ -68,12 +69,14 @@ export class CourseModalComponent implements OnChanges {
   constructor(
     public store: ScheduleStore,
     private toast: ToastService,
+    public config: CourseConfigStore,
   ) {}
   ngOnChanges(changes: SimpleChanges): void {
     if ((changes['open'] && this.visible) || changes['initial']) {
       if (this.initial) this.loadFromInitial(this.initial);
     }
   }
+
   private loadFromInitial(src: {
     id?: string;
     name: string;
@@ -98,19 +101,19 @@ export class CourseModalComponent implements OnChanges {
     this.selPeriod.set('M');
   }
 
-
   hourRange(p: Period, slot: number): string {
-    const [start, end] = SLOT_TO_TIME(p, slot);
+    const twelve = this.config.twelveAsFirst();
+    const [start, end] = SLOT_TO_TIME(p, slot, twelve);
     return `${formatHour(start)}–${formatHour(end)}`;
   }
 
-
   slotOptions = computed(() => {
     const p = this.selPeriod();
-    const max = p === 'T' ? 6 : 5;
+    const twelve = this.config.twelveAsFirst();
+    const max = periodMaxSlot(p, twelve);
     return Array.from({ length: max }, (_, i) => {
       const n = i + 1;
-      const [start, end] = SLOT_TO_TIME(p, n);
+      const [start, end] = SLOT_TO_TIME(p, n, twelve);
       return { n, label: `${formatHour(start)}–${formatHour(end)}` };
     });
   });
@@ -167,11 +170,10 @@ export class CourseModalComponent implements OnChanges {
     found.slots = merged;
     this.manual = [...this.manual];
   }
-
   private fromCode(): Meeting[] {
     const raw = this.code?.trim();
     if (!raw) return [];
-    return parseScheduleCode(raw);
+    return parseScheduleCode(raw, this.config.twelveAsFirst());
   }
 
   private mergeMeetings(a: Meeting[], b: Meeting[]): Meeting[] {
@@ -201,31 +203,31 @@ export class CourseModalComponent implements OnChanges {
     this.selPeriod.set('M');
   }
   get saveDisabledReason(): string {
-  if (!this.name?.trim()) return 'Informe o nome da disciplina.';
-  if (!(this.manual.length || (this.selDay() && this.selSlots.size) || this.code?.trim())) {
-    return 'Adicione 1 bloco ou insira um código válido.';
+    if (!this.name?.trim()) return 'Informe o nome da disciplina.';
+    if (!(this.manual.length || (this.selDay() && this.selSlots.size) || this.code?.trim())) {
+      return 'Adicione 1 bloco ou insira um código válido.';
+    }
+    return '';
   }
-  return '';
-}
-get canSave(): boolean {
-  const hasName = !!this.name?.trim();
-  const hasManual = this.manual.length > 0;
-  const hasInline = !!(this.selDay() && this.selSlots.size);
-  const hasCode = !!this.code?.trim();
-  return hasName && (hasManual || hasInline || hasCode);
-}
+  get canSave(): boolean {
+    const hasName = !!this.name?.trim();
+    const hasManual = this.manual.length > 0;
+    const hasInline = !!(this.selDay() && this.selSlots.size);
+    const hasCode = !!this.code?.trim();
+    return hasName && (hasManual || hasInline || hasCode);
+  }
   save(): void {
     if (!this.name?.trim()) {
       this.toast.push('Informe o nome da disciplina antes de salvar.', 'warn');
       const el = this.nameInput?.nativeElement;
-    if (el) {
-      el.focus();
-      el.classList.remove('shake');
+      if (el) {
+        el.focus();
+        el.classList.remove('shake');
 
-      void el.offsetWidth;
-      el.classList.add('shake');
-    }
-    return;
+        void el.offsetWidth;
+        el.classList.add('shake');
+      }
+      return;
     }
 
     const meetings = this.mergeMeetings([...this.manual, ...this.pendingFromUI()], this.fromCode());

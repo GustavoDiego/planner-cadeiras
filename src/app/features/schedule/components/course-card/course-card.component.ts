@@ -23,6 +23,8 @@ export class CourseCardComponent {
   @Input() course!: Course;
   @Input() day!: string;
   @Input() hour!: number;
+  @Input() twelve = false;
+
   @Output() dragStart = new EventEmitter<void>();
   @Output() dragEnd = new EventEmitter<void>();
   @Output() openShare = new EventEmitter<Course>();
@@ -30,18 +32,24 @@ export class CourseCardComponent {
   private dragging = false;
 
   get visible(): boolean {
-    return hasAt(this.course, this.day, this.hour);
+    return hasAt(this.course, this.day, this.hour, this.twelve);
   }
+
+  store = inject(ScheduleStore);
   get typeColor(): string {
     const t = this.store.types().find((x) => x.id === this.course.typeId);
     return t?.color ?? 'var(--primary)';
   }
+  typeLabel = computed(() => {
+    const t = this.store.types().find((x) => x.id === this.course.typeId);
+    return t?.label ?? '';
+  });
 
   get dragData(): DragData | null {
     for (const m of this.course.meetings) {
       if (m.day !== this.day) continue;
       for (const s of m.slots) {
-        const [a] = SLOT_TO_TIME(m.period, s);
+        const [a] = SLOT_TO_TIME(m.period as PeriodKey, s, this.twelve);
         if (a === this.hour) {
           return {
             courseId: this.course.id,
@@ -52,11 +60,6 @@ export class CourseCardComponent {
     }
     return null;
   }
-  store = inject(ScheduleStore);
-  typeLabel = computed(() => {
-    const t = this.store.types().find((x) => x.id === this.course.typeId);
-    return t?.label ?? '';
-  });
 
   onCardActivate(): void {
     if (!this.dragging) this.openShare.emit(this.course);
@@ -72,13 +75,14 @@ export class CourseCardComponent {
     }, 0);
   }
 }
-function hasAt(c: Course, day: string, hour: number): boolean {
-  for (const m of c.meetings)
-    if (m.day === day) {
-      for (const s of m.slots) {
-        const [a] = SLOT_TO_TIME(m.period, s);
-        if (a === hour) return true;
-      }
+
+function hasAt(c: Course, day: string, hour: number, twelve = false): boolean {
+  for (const m of c.meetings) {
+    if (m.day !== day) continue;
+    for (const s of m.slots) {
+      const [a] = SLOT_TO_TIME(m.period as PeriodKey, s, twelve);
+      if (a === hour) return true;
     }
+  }
   return false;
 }

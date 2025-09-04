@@ -11,7 +11,9 @@ export class ExportImageService {
     const ios = this.isIOS();
     let placeholderWin: Window | null = null;
     if (ios) {
-      try { placeholderWin = window.open('', '_blank'); } catch {}
+      try {
+        placeholderWin = window.open('', '_blank');
+      } catch {}
     }
 
     const dataUrl = await htmlToImage.toPng(el, { cacheBust: true, pixelRatio: 2 });
@@ -37,7 +39,8 @@ export class ExportImageService {
         } else {
           window.open(dataUrl, '_blank');
         }
-      } finally {}
+      } finally {
+      }
       return;
     }
 
